@@ -22,6 +22,7 @@ module YogSothoth
 open System
 open jabber
 open jabber.client
+open jabber.connection
 
 let prompt (message : string) =
     Console.Write (message + ": ")
@@ -30,21 +31,29 @@ let prompt (message : string) =
 let userName = prompt "JID"
 let password = prompt "Password"
 let owner = prompt "Owner"
-let room = prompt "Room"
+let roomName = prompt "Room"
 
 let jid = new JID (userName)
+let roomJid = new JID (roomName + "/Yog-Sothoth")
 let client = new JabberClient (User = jid.User,
                                Server = jid.Server,
                                NetworkHost = jid.Server,
                                Password = password)
+client.AutoPresence <- false
+let roomManager = new ConferenceManager (Stream = client)
 
 client.OnAuthError.Add (fun _ -> printf "Auth error.")
 client.OnConnect.Add (fun _ -> printf "Connected.")
+client.OnError.Add (fun e -> printf "%s" (e.ToString ()))
 client.OnAuthenticate.Add (fun _ ->
     client.Message (owner, "I'm online!")
+    let room = roomManager.GetRoom (roomJid)
+    room.add_OnPresenceError (fun _ e -> printf "%s" (e.ToString ()))
+    room.add_OnJoin (fun _ ->
+        room.PublicMessage ("Hello room!"))
+    room.Join ()
 )
 
 client.Connect ()
-client.Login ()
 
 Console.ReadLine () |> ignore
