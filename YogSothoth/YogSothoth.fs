@@ -1,4 +1,4 @@
-﻿(*  Copyright (C) 2011 by ForNeVeR
+﻿(* Copyright (C) 2011 by ForNeVeR
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -17,3 +17,34 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. *)
+
+module YogSothoth
+open System
+open jabber
+open jabber.client
+
+let prompt (message : string) =
+    Console.Write (message + ": ")
+    Console.ReadLine ()
+
+let userName = prompt "JID"
+let password = prompt "Password"
+let owner = prompt "Owner"
+let room = prompt "Room"
+
+let jid = new JID (userName)
+let client = new JabberClient (User = jid.User,
+                               Server = jid.Server,
+                               NetworkHost = jid.Server,
+                               Password = password)
+
+client.OnAuthError.Add (fun _ -> printf "Auth error.")
+client.OnConnect.Add (fun _ -> printf "Connected.")
+client.OnAuthenticate.Add (fun _ ->
+    client.Message (owner, "I'm online!")
+)
+
+client.Connect ()
+client.Login ()
+
+Console.ReadLine () |> ignore
