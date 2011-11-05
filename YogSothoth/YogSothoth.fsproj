@@ -35,6 +35,9 @@
     <DocumentationFile>bin\Release\YogSothoth.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="jabber-net">
+      <HintPath>D:\X-Files\Dropbox\Projects\yog-sothoth\Third-party\jabber-net.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />
