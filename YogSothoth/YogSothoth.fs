@@ -32,27 +32,26 @@ let userName = prompt "JID"
 let password = prompt "Password"
 let owner = prompt "Owner"
 let roomName = prompt "Room"
+let server = prompt "Server"
 
 let jid = new JID (userName)
-let roomJid = new JID (roomName + "/Yog-Sothoth")
+let roomJid = new JID (roomName, server, "Yog-Sothoth")
 let client = new JabberClient (User = jid.User,
                                Server = jid.Server,
-                               NetworkHost = jid.Server,
                                Password = password)
-client.AutoPresence <- false
-let roomManager = new ConferenceManager (Stream = client)
 
-client.OnAuthError.Add (fun _ -> printf "Auth error.")
-client.OnConnect.Add (fun _ -> printf "Connected.")
-client.OnError.Add (fun e -> printf "%s" (e.ToString ()))
+client.OnAuthError.Add (fun _ -> printf "Auth error.\n")
+client.OnConnect.Add (fun _ -> printf "Connected.\n")
+client.OnError.Add (fun e -> printf "%s\n" (e.ToString ()))
+
+let roomManager = new ConferenceManager (Stream = client)
+roomManager.add_OnJoin (fun room ->
+    printf "Joined to room.\n"
+    room.PublicMessage "Hortha Hell!")
+
 client.OnAuthenticate.Add (fun _ ->
-    client.Message (owner, "I'm online!")
     let room = roomManager.GetRoom (roomJid)
-    room.add_OnPresenceError (fun _ e -> printf "%s" (e.ToString ()))
-    room.add_OnJoin (fun _ ->
-        room.PublicMessage ("Hello room!"))
-    room.Join ()
-)
+    room.Join ())
 
 client.Connect ()
 
