@@ -7,6 +7,9 @@ open System.Xml
 open jabber
 open jabber.client
 open jabber.connection
+open Raven.Client
+
+open YogSothoth.Storage
 
 type XmppConnection =
     { Client : JabberClient
@@ -14,15 +17,20 @@ type XmppConnection =
 
 let private debug = false
 
-let private logInfo message =
-    printfn "%s" message
+let private logInfo text =
+    printfn "%s" text
 
-let private logError = logInfo
+let private logError text =
+    let oldColor = Console.ForegroundColor
+    Console.ForegroundColor <- ConsoleColor.Red
+    logInfo text
+    Console.ForegroundColor <- oldColor
 
 let private logElement logger header (element : XmlElement) =
     logger (sprintf "%s: %s" header (element.ToString ()))
 
 let private logElementError = logElement logError
+let private logElementInfo = logElement logInfo
 
 let connect (jid : string) (password : string) (roomJid : string) (nickname : string) : Async<XmppConnection> =
     let jid = JID jid
@@ -38,15 +46,15 @@ let connect (jid : string) (password : string) (roomJid : string) (nickname : st
     client.OnError.Add (fun e -> logError (sprintf "Error: %s" (e.ToString ())))
 
     if debug then
-        client.OnReadText.Add (fun text -> logInfo (sprintf "Read: %s" text))
-        client.OnWriteText.Add (fun text -> logInfo (sprintf "Write: %s" text))
+        client.OnReadText.Add (logInfo << (sprintf "Read: %s"))
+        client.OnWriteText.Add (logInfo << (sprintf "Write: %s"))
 
     client.OnConnect.Add (fun _ -> logInfo "Connected")
 
     client.Connect ()
 
     async {
-        let completionSource = TaskCompletionSource()
+        let completionSource = TaskCompletionSource ()
         client.OnAuthenticate.Add (fun _ -> completionSource.SetResult ())
 
         do! Async.AwaitTask completionSource.Task
@@ -55,13 +63,27 @@ let connect (jid : string) (password : string) (roomJid : string) (nickname : st
               RoomJid = roomJid }
     }
 
-let logMessages { Client = client; RoomJid = roomJid } : Unit =
+let isHistorical (message : jabber.protocol.client.Message) = not (isNull message.["delay"])
+let isTechnical (message : jabber.protocol.client.Message) = isNull message.From.Resource
+
+let logMessages (storage : IDocumentStore) { Client = client; RoomJid = roomJid } : Unit =
+    let processMessage m =
+        if not (isHistorical m || isTechnical m) then
+            logElementInfo "Message" m
+            let message =
+                { Conference = roomJid.ToString ()
+                  Sender = m.From.Resource
+                  DateTime = DateTime.UtcNow
+                  Text = m.Body }
+            Storage.save storage message
+
     let roomManager = new ConferenceManager (Stream = client)
     roomManager.add_OnJoin (fun room -> logInfo (sprintf "Joined room %A" room.JID))
     let room = roomManager.GetRoom roomJid
+    room.OnRoomMessage.Add processMessage
     room.Join ()
 
 let waitForTermination { Client = client } : Async<Unit> =
-    let completionSource = TaskCompletionSource()
+    let completionSource = TaskCompletionSource ()
     client.OnDisconnect.Add (fun _ -> completionSource.SetResult ())
     Async.AwaitTask completionSource.Task

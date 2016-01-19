@@ -4,7 +4,7 @@ open System.Configuration
 
 let private maxReconnectCount = 10
 
-let private logMessages jid password roomJid nickname =
+let private logMessages store jid password roomJid nickname =
     let rec tryConnect tryNumber =
         async {
             try
@@ -22,17 +22,21 @@ let private logMessages jid password roomJid nickname =
 
     async {
         let! connection = tryConnect 0
-        Xmpp.logMessages connection
+        Xmpp.logMessages store connection
         do! Xmpp.waitForTermination connection
         return 0
     }
 
+let private setting (name : string) =
+    ConfigurationManager.AppSettings.[name]
 
 [<EntryPoint>]
 let main _ =
-    let jid = ConfigurationManager.AppSettings.["JID"]
-    let password = ConfigurationManager.AppSettings.["Password"]
-    let roomJid = ConfigurationManager.AppSettings.["RoomJID"]
-    let nickname = ConfigurationManager.AppSettings.["RoomNickname"]
+    let jid = setting "JID"
+    let password = setting "Password"
+    let roomJid = setting "RoomJID"
+    let nickname = setting "RoomNickname"
+    let dataDirectory = setting "DataDirectory"
 
-    Async.RunSynchronously (logMessages jid password roomJid nickname)
+    use store = Storage.initializeStore dataDirectory
+    Async.RunSynchronously (logMessages store jid password roomJid nickname)
