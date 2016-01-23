@@ -39,5 +39,5 @@ let main _ =
 
     use store = Storage.initializeStore dataDirectory
     Async.Start (logMessages store jid password roomJid nickname)
-    WebServer.run ()
+    WebServer.run store
     0
