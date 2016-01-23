@@ -16,9 +16,17 @@ let initializeStore (dataDirectory : string) : IDocumentStore =
     let store = new EmbeddableDocumentStore (DataDirectory = dataDirectory)
     store.Initialize ()
 
-let getMessages (store : IDocumentStore) (room : string) : ResizeArray<Message> =
+let getMessages (store : IDocumentStore)
+                (room : string)
+                (start : DateTime)
+                (finish : DateTime) : ResizeArray<Message> =
     use session = store.OpenSession ()
-    session.Query<Message>().ToList()
+    query {
+        for message in session.Query<Message>() do
+        where (message.Conference = room && message.DateTime >= start && message.DateTime < finish)
+        select message
+    } |> Enumerable.ToList
+
 
 let save (store : IDocumentStore) (message : Message) : Unit =
     use session = store.OpenSession ()
