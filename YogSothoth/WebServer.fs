@@ -1,33 +1,62 @@
 ﻿module YogSothoth.WebServer
 
-open System
-open System.Globalization
+open System.Runtime.Serialization
 
 open Suave
-open Suave.Operators
+open Suave.Embedded
 open Suave.Filters
-open Suave.Successful
-open Suave.Files
+open Suave.Json
+open Suave.Operators
 open Suave.RequestErrors
+open Suave.Successful
 
-open YogSothoth.Storage
+[<DataContract>]
+type Message =
+    { [<field: DataMember(Name = "sender")>]
+      Sender : string
 
-let private isoDateFormat = "yyyy-MM-ddTHH:mm:ss"
+      [<field: DataMember(Name = "timestamp")>]
+      Timestamp : int64
 
-let private parseDate date =
-    DateTime.ParseExact (date, isoDateFormat, CultureInfo.InvariantCulture)
+      [<field: DataMember(Name = "text")>]
+      Text : string }
+
+let private okJson o =
+    let json = toJson o
+    ok json
 
 let private app store =
-    let getRoomMessages room (startDate : DateTime) =
-        let finish = startDate.Date.AddDays 1.0
-        Storage.getMessages store room startDate finish
+    let withTimestamps func (request : HttpRequest) =
+        cond (request.queryParam "from") (fun fromValue ->
+            let from = int64 fromValue
+            cond (request.queryParam "to") (fun toValue ->
+                let ``to`` = int64 toValue
+                func (from, ``to``)) never) never
 
-    let response room (messages : ResizeArray<Message>) = OK (sprintf "room %s : %d" room messages.Count)
-    let roomMessageHandler room =
-        request (fun r -> cond (r.queryParam "date") (parseDate >> getRoomMessages room >> response room) never)
+    let getRoomMessages room (startDate, endDate) =
+        let messages =
+            Storage.getMessages store room startDate endDate
+            |> Seq.map (fun { Sender = sender
+                              Timestamp = timestamp
+                              Text = text } -> { Sender = sender
+                                                 Timestamp = timestamp
+                                                 Text = text })
+            |> Seq.toArray
+        okJson messages
 
-    choose [ GET >=> choose [ path "/" >=> file "index.html"; browseHome
-                              pathScan "/api/messages/%s" roomMessageHandler ]
+    let getRooms =
+        request (fun _ ->
+            let rooms = Storage.getRooms store
+            okJson rooms)
+
+    let roomMessagesHandler room =
+        request (withTimestamps (getRoomMessages room))
+
+    choose [ GET >=> choose [ path "/" >=> resourceFromDefaultAssembly "index.html"
+                              path "/app.js" >=> resourceFromDefaultAssembly "app.js"
+                              path "/app.css" >=> resourceFromDefaultAssembly "app.css"
+                              path "/api/rooms" >=> getRooms
+                              pathScan "/api/messages/%s" roomMessagesHandler ]
              NOT_FOUND "Found no handlers." ]
 
 let run store =

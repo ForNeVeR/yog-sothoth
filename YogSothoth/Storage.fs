@@ -9,7 +9,7 @@ open Raven.Client.Embedded
 type Message =
     { Conference : string
       Sender : string
-      DateTime : DateTime
+      Timestamp : int64
       Text : string }
 
 let private messageLimit = 100
@@ -18,17 +18,24 @@ let initializeStore (dataDirectory : string) : IDocumentStore =
     let store = new EmbeddableDocumentStore (DataDirectory = dataDirectory)
     store.Initialize ()
 
-let getMessages (store : IDocumentStore)
-                (room : string)
-                (start : DateTime)
-                (finish : DateTime) : ResizeArray<Message> =
+let getRooms (store : IDocumentStore) : ResizeArray<string> =
     use session = store.OpenSession ()
     query {
-        for message in session.Query<Message>() do
-        where (message.Conference = room && message.DateTime >= start && message.DateTime < finish)
-        sortBy message.DateTime
+        for message in session.Query<Message> () do
+        select message.Conference
+        distinct
+    } |> Enumerable.ToList
+
+let getMessages (store : IDocumentStore)
+                (room : string)
+                (start : int64)
+                (finish : int64) : ResizeArray<Message> =
+    use session = store.OpenSession ()
+    query {
+        for message in session.Query<Message> () do
+        where (message.Conference = room && message.Timestamp > start && message.Timestamp <= finish)
+        sortBy message.Timestamp
         take messageLimit
-        select message
     } |> Enumerable.ToList
 
 let save (store : IDocumentStore) (message : Message) : Unit =
