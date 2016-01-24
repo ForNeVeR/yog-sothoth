@@ -3,3 +3,8 @@
 
 bin/
 obj/
+
+/YogSothoth.Frontend/app.js
+/YogSothoth.Frontend/app.js.map
+
+*.user
