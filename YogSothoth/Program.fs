@@ -24,7 +24,6 @@ let private logMessages store jid password roomJid nickname =
         let! connection = tryConnect 0
         Xmpp.logMessages store connection
         do! Xmpp.waitForTermination connection
-        return 0
     }
 
 let private setting (name : string) =
@@ -39,4 +38,6 @@ let main _ =
     let dataDirectory = setting "DataDirectory"
 
     use store = Storage.initializeStore dataDirectory
-    Async.RunSynchronously (logMessages store jid password roomJid nickname)
+    Async.Start (logMessages store jid password roomJid nickname)
+    WebServer.run store
+    0
