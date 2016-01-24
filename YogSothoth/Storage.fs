@@ -12,6 +12,8 @@ type Message =
       DateTime : DateTime
       Text : string }
 
+let private messageLimit = 100
+
 let initializeStore (dataDirectory : string) : IDocumentStore =
     let store = new EmbeddableDocumentStore (DataDirectory = dataDirectory)
     store.Initialize ()
@@ -24,9 +26,10 @@ let getMessages (store : IDocumentStore)
     query {
         for message in session.Query<Message>() do
         where (message.Conference = room && message.DateTime >= start && message.DateTime < finish)
+        sortBy message.DateTime
+        take messageLimit
         select message
     } |> Enumerable.ToList
-
 
 let save (store : IDocumentStore) (message : Message) : Unit =
     use session = store.OpenSession ()
