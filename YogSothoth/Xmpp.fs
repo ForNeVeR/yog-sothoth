@@ -71,7 +71,7 @@ let logMessages (storage : IDocumentStore) { Client = client; RoomJid = roomJid 
         if not (isHistorical m || isTechnical m) then
             logElementInfo "Message" m
             let message =
-                { Conference = roomJid.ToString ()
+                { Conference = roomJid.BareJID.ToString ()
                   Sender = m.From.Resource
                   DateTime = DateTime.UtcNow
                   Text = m.Body }
