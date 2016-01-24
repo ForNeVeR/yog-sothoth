@@ -9,7 +9,7 @@ open Raven.Client.Embedded
 type Message =
     { Conference : string
       Sender : string
-      DateTime : DateTime
+      Timestamp : int64
       Text : string }
 
 let private messageLimit = 100
@@ -28,13 +28,13 @@ let getRooms (store : IDocumentStore) : ResizeArray<string> =
 
 let getMessages (store : IDocumentStore)
                 (room : string)
-                (start : DateTime)
-                (finish : DateTime) : ResizeArray<Message> =
+                (start : int64)
+                (finish : int64) : ResizeArray<Message> =
     use session = store.OpenSession ()
     query {
         for message in session.Query<Message> () do
-        where (message.Conference = room && message.DateTime > start && message.DateTime <= finish)
-        sortBy message.DateTime
+        where (message.Conference = room && message.Timestamp > start && message.Timestamp <= finish)
+        sortBy message.Timestamp
         take messageLimit
     } |> Enumerable.ToList
 

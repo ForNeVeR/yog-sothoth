@@ -73,7 +73,7 @@ let logMessages (storage : IDocumentStore) { Client = client; RoomJid = roomJid 
             let message =
                 { Conference = roomJid.BareJID.ToString ()
                   Sender = m.From.Resource
-                  DateTime = DateTime.UtcNow
+                  Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds ()
                   Text = m.Body }
             Storage.save storage message
 

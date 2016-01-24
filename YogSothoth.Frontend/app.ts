@@ -1,44 +1,40 @@
 ﻿declare var fetch;
 
-function formatDate(date: Date) {
-    function padLeft(length, char, s) {
-        while (s.toString().length < length) {
-            s = char + s.toString();
-        }
-
-        return s;
-    }
-
-    var year = padLeft(4, '0', date.getUTCFullYear());
-    var month = padLeft(2, '0', date.getUTCMonth() + 1);
-    var day = padLeft(2, '0', date.getUTCDate());
-    var hour = padLeft(2, '0', date.getUTCHours());
-    var minute = padLeft(2, '0', date.getUTCMinutes());
-    var second = padLeft(2, '0', date.getUTCSeconds());
-    return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+// Date functions
+function today() {
+    var now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
-function getRooms() {
-    var url = 'api/rooms';
-    return fetch(url).then(response => response.json());
+function tommorow(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 }
 
-function getMessages(room, date) {
-    var url = `api/messages/${room}?date=${formatDate(date)}`;
-    return fetch(url).then(response => response.json());
-}
-
+// DOM functions
 function cleanElement(element: HTMLElement) {
     while (element.firstChild) {
         element.removeChild(element.firstChild);
     }
 }
 
+// API functions
+function getRooms() {
+    var url = 'api/rooms';
+    return fetch(url).then(response => response.json());
+}
+
+function getMessages(room, from, to) {
+    var url = `api/messages/${room}?from=${from.getTime()}&to=${to.getTime()}`;
+    return fetch(url).then(response => response.json());
+}
+
+// Business logic functions
 function enablePolling(settings) {
     function poll() {
         var room = settings.room;
         var date = settings.date;
-        getMessages(room, date).then(messages => {
+        var to = tommorow(date);
+        getMessages(room, date, to).then(messages => {
             if (settings.room !== room) {
                 setTimeout(poll, 1000);
                 return;
@@ -46,7 +42,7 @@ function enablePolling(settings) {
 
             var lastMessage = messages[messages.length - 1];
             if (lastMessage != null) {
-                settings.date = new Date(lastMessage.dateTime);
+                settings.date = new Date(lastMessage.timestamp);
             }
 
             messages.forEach(message => {
@@ -68,11 +64,7 @@ function enablePolling(settings) {
     setTimeout(poll, 1000);
 }
 
-function today() {
-    var now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
-
+// Endpoint
 window.onload = () => {
     var room = <HTMLSelectElement>document.getElementById('room');
     var messages = document.getElementById('messages');

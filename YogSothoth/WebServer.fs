@@ -1,7 +1,5 @@
 ﻿module YogSothoth.WebServer
 
-open System
-open System.Globalization
 open System.Runtime.Serialization
 
 open Suave
@@ -17,33 +15,31 @@ type Message =
     { [<field: DataMember(Name = "sender")>]
       Sender : string
 
-      [<field: DataMember(Name = "dateTime")>]
-      DateTime : string
+      [<field: DataMember(Name = "timestamp")>]
+      Timestamp : int64
 
       [<field: DataMember(Name = "text")>]
       Text : string }
-
-let private isoDateFormat = "yyyy-MM-ddTHH:mm:ss"
-
-let private parseDate date =
-    DateTime.ParseExact (date,
-                         isoDateFormat,
-                         CultureInfo.InvariantCulture,
-                         DateTimeStyles.AssumeUniversal ||| DateTimeStyles.AdjustToUniversal)
 
 let private okJson o =
     let json = toJson o
     ok json
 
 let private app store =
-    let getRoomMessages room (startDate : DateTime) =
-        let finish = startDate.Date.AddDays 1.0
+    let withTimestamps func (request : HttpRequest) =
+        cond (request.queryParam "from") (fun fromValue ->
+            let from = int64 fromValue
+            cond (request.queryParam "to") (fun toValue ->
+                let ``to`` = int64 toValue
+                func (from, ``to``)) never) never
+
+    let getRoomMessages room (startDate, endDate) =
         let messages =
-            Storage.getMessages store room startDate finish
+            Storage.getMessages store room startDate endDate
             |> Seq.map (fun { Sender = sender
-                              DateTime = dateTime
+                              Timestamp = timestamp
                               Text = text } -> { Sender = sender
-                                                 DateTime = dateTime.ToString "s"
+                                                 Timestamp = timestamp
                                                  Text = text })
             |> Seq.toArray
         okJson messages
@@ -54,7 +50,7 @@ let private app store =
             okJson rooms)
 
     let roomMessagesHandler room =
-        request (fun r -> cond (r.queryParam "date") (parseDate >> getRoomMessages room) never)
+        request (withTimestamps (getRoomMessages room))
 
     choose [ GET >=> choose [ path "/" >=> resourceFromDefaultAssembly "index.html"
                               path "/app.js" >=> resourceFromDefaultAssembly "app.js"
