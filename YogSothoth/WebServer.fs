@@ -1,6 +1,7 @@
 ﻿module YogSothoth.WebServer
 
 open System
+open System.Globalization
 
 open Suave
 open Suave.Operators
@@ -9,19 +10,24 @@ open Suave.Successful
 open Suave.Files
 open Suave.RequestErrors
 
-let private date year month day =
-    DateTime (year, month, day, 0, 0, 0, DateTimeKind.Utc)
+open YogSothoth.Storage
+
+let private isoDateFormat = "yyyy-MM-ddTHH:mm:ss"
+
+let private parseDate date =
+    DateTime.ParseExact (date, isoDateFormat, CultureInfo.InvariantCulture)
 
 let private app store =
-    let roomMessages (room, year, month, day) =
-        let start = date year month day
-        let finish = start.AddDays 1.0
-        let messages = Storage.getMessages store room start finish
-        let response = sprintf "room %s : %d" room messages.Count
-        OK response
+    let getRoomMessages room (startDate : DateTime) =
+        let finish = startDate.Date.AddDays 1.0
+        Storage.getMessages store room startDate finish
+
+    let response room (messages : ResizeArray<Message>) = OK (sprintf "room %s : %d" room messages.Count)
+    let roomMessageHandler room =
+        request (fun r -> cond (r.queryParam "date") (parseDate >> getRoomMessages room >> response room) never)
 
     choose [ GET >=> choose [ path "/" >=> file "index.html"; browseHome
-                              pathScan "/api/messages/%s/%d/%d/%d" roomMessages ]
+                              pathScan "/api/messages/%s" roomMessageHandler ]
              NOT_FOUND "Found no handlers." ]
 
 let run store =
