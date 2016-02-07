@@ -79,7 +79,7 @@ window.onload = () => {
         if (value !== pollSettings.room) {
             cleanElement(messages);
             pollSettings.room = value;
-            pollSettings.date = new Date(2016, 0, 24, 13, 0, 0)// today();
+            pollSettings.date = today();
         }
     });
 
