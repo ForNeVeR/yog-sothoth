@@ -55,13 +55,13 @@
     <Content Include="App.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="..\YogSothoth.Frontend\app.css">
+    <EmbeddedResource Include="..\YogSothoth.Web\app.css">
       <Link>Content\app.css</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\YogSothoth.Frontend\app.js">
-      <Link>Content\app.js</Link>
+    <EmbeddedResource Include="..\YogSothoth.Web\bundle.js">
+      <Link>Content\bundle.js</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\YogSothoth.Frontend\index.html">
+    <EmbeddedResource Include="..\YogSothoth.Web\index.html">
       <Link>Content\index.html</Link>
     </EmbeddedResource>
     <Content Include="packages.config" />

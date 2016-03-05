@@ -3,6 +3,19 @@
 
 This is a program to log and show logs for XMPP multi-user chats.
 
+Build
+-----
+
+To build the project, you'll need [Node.js][node-js] with [npm][]. Prepare the
+build:
+
+    $ cd YogSothoth.Web
+    $ npm install
+    $ npm run webpack
+
+After that, build the project in Visual Studio or any MSBuild-compatible
+software.
+
 Licensing
 ---------
 
@@ -13,6 +26,8 @@ for details.
 
 [andivionian-status-classifier]: https://github.com/ForNeVeR/andivionian-status-classifier
 [appveyor-build]: https://ci.appveyor.com/project/ForNeVeR/yog-sothoth/branch/develop
+[node-js]: https://nodejs.org/
+[npm]: https://www.npmjs.com/
 [travis-build]: https://travis-ci.org/ForNeVeR/yog-sothoth
 
 [appveyor-build-status]: https://ci.appveyor.com/api/projects/status/p5jam1yygqieh6uy/branch/develop?svg=true

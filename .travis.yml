@@ -2,6 +2,7 @@ language: csharp
 mono: latest
 solution: Naggum.sln
 install:
-    - nuget restore
+- nuget restore
+- cd YogSothoth.Web && npm install && npm run webpack
 script:
-    - xbuild /p:Configuration=Release /p:TargetFrameworkVersion="v4.5"
+- xbuild /p:Configuration=Release /p:TargetFrameworkVersion="v4.5"

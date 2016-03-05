@@ -1,0 +1,12 @@
+{
+  "name": "YogSothoth",
+  "version": "0.0.1",
+  "scripts": {
+    "webpack": "webpack"
+  },
+  "devDependencies": {
+    "ts-loader": "^0.8.1",
+    "typescript": "^1.8.7",
+    "webpack": "^1.12.14"
+  }
+}

@@ -53,7 +53,7 @@ let private app store =
         request (withTimestamps (getRoomMessages room))
 
     choose [ GET >=> choose [ path "/" >=> resourceFromDefaultAssembly "index.html"
-                              path "/app.js" >=> resourceFromDefaultAssembly "app.js"
+                              path "/bundle.js" >=> resourceFromDefaultAssembly "bundle.js"
                               path "/app.css" >=> resourceFromDefaultAssembly "app.css"
                               path "/api/rooms" >=> getRooms
                               pathScan "/api/messages/%s" roomMessagesHandler ]

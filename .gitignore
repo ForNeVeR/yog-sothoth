@@ -2,9 +2,11 @@
 /packages/
 
 bin/
+node_modules/
 obj/
 
-/YogSothoth.Frontend/app.js
-/YogSothoth.Frontend/app.js.map
+/YogSothoth.Web/app.js
+/YogSothoth.Web/bundle.js
+/YogSothoth.Web/*.js.map
 
 *.user
