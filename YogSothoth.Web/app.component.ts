@@ -1,4 +1,54 @@
-﻿declare var fetch;
+import {Component} from 'angular2/core';
+import {OnInit} from 'angular2/core';
+
+@Component({
+    selector: 'ys-app',
+    template: `<select id="room">
+    <option>Loading...</option>
+</select>
+
+<ul id="dates"></ul>
+
+<ul id="messages"></ul>`
+})
+export class AppComponent /*implements OnInit*/ {
+    constructor() {
+        console.log('ctor');
+    }
+
+    ngOnInit() {
+        var room = <HTMLSelectElement>document.getElementById('room');
+        var messages = document.getElementById('messages');
+        var pollSettings = {
+            element: messages,
+            room: '',
+            date: today()
+        };
+
+        room.addEventListener('change', () => {
+            var value = room.value;
+            if (value !== pollSettings.room) {
+                cleanElement(messages);
+                pollSettings.room = value;
+                pollSettings.date = today();
+            }
+        });
+
+        getRooms().then(rooms => {
+            cleanElement(room);
+            rooms.forEach(roomName => {
+                var element = document.createElement('option');
+                element.innerText = roomName;
+                element.value = roomName;
+                room.appendChild(element);
+            });
+        });
+
+        enablePolling(pollSettings);
+    }
+}
+
+declare var fetch;
 
 // Date functions
 function today() {
@@ -63,35 +113,3 @@ function enablePolling(settings) {
 
     setTimeout(poll, 1000);
 }
-
-// Endpoint
-window.onload = () => {
-    var room = <HTMLSelectElement>document.getElementById('room');
-    var messages = document.getElementById('messages');
-    var pollSettings = {
-        element: messages,
-        room: '',
-        date: today()
-    };
-
-    room.addEventListener('change', () => {
-        var value = room.value;
-        if (value !== pollSettings.room) {
-            cleanElement(messages);
-            pollSettings.room = value;
-            pollSettings.date = today();
-        }
-    });
-
-    getRooms().then(rooms => {
-        cleanElement(room);
-        rooms.forEach(roomName => {
-            var element = document.createElement('option');
-            element.innerText = roomName;
-            element.value = roomName;
-            room.appendChild(element);
-        });
-    });
-
-    enablePolling(pollSettings);
-};

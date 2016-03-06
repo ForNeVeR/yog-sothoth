@@ -35,9 +35,10 @@ let main _ =
     let password = setting "Password"
     let roomJid = setting "RoomJID"
     let nickname = setting "RoomNickname"
+    let contentDirectory = setting "ContentDirectory"
     let dataDirectory = setting "DataDirectory"
 
     use store = Storage.initializeStore dataDirectory
     Async.Start (logMessages store jid password roomJid nickname)
-    WebServer.run store
+    WebServer.run contentDirectory store
     0

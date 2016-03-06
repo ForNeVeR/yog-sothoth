@@ -5,8 +5,9 @@ bin/
 node_modules/
 obj/
 
-/YogSothoth.Web/app.js
-/YogSothoth.Web/bundle.js
+/YogSothoth.Web/typings
+/YogSothoth.Web/*.js
 /YogSothoth.Web/*.js.map
+!/YogSothoth.Web/webpack.config.js
 
 *.user

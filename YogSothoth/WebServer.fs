@@ -1,9 +1,11 @@
 ﻿module YogSothoth.WebServer
 
+open System.IO
 open System.Runtime.Serialization
 
+open Raven.Client
 open Suave
-open Suave.Embedded
+open Suave.Files
 open Suave.Filters
 open Suave.Json
 open Suave.Operators
@@ -25,7 +27,7 @@ let private okJson o =
     let json = toJson o
     ok json
 
-let private app store =
+let private app contentDirectory store =
     let withTimestamps func (request : HttpRequest) =
         cond (request.queryParam "from") (fun fromValue ->
             let from = int64 fromValue
@@ -52,12 +54,11 @@ let private app store =
     let roomMessagesHandler room =
         request (withTimestamps (getRoomMessages room))
 
-    choose [ GET >=> choose [ path "/" >=> resourceFromDefaultAssembly "index.html"
-                              path "/bundle.js" >=> resourceFromDefaultAssembly "bundle.js"
-                              path "/app.css" >=> resourceFromDefaultAssembly "app.css"
-                              path "/api/rooms" >=> getRooms
-                              pathScan "/api/messages/%s" roomMessagesHandler ]
+    choose [ GET >=> choose [ path "/api/rooms" >=> getRooms
+                              pathScan "/api/messages/%s" roomMessagesHandler
+                              path "/" >=> file (Path.Combine (contentDirectory, "index.html"))
+                              browse contentDirectory ]
              NOT_FOUND "Found no handlers." ]
 
-let run store =
-    startWebServer defaultConfig (app store)
+let run (contentDirectory : string) (store : IDocumentStore) : unit =
+    startWebServer defaultConfig (app contentDirectory store)
