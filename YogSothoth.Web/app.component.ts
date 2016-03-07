@@ -1,5 +1,6 @@
 import {Component} from 'angular2/core';
 import {OnInit} from 'angular2/core';
+import {Room} from './room';
 import {RoomService} from './room.service';
 
 @Component({
@@ -7,40 +8,34 @@ import {RoomService} from './room.service';
     templateUrl: 'app.component.html',
     providers: [ RoomService ]
 })
-export class AppComponent /*implements OnInit*/ {
+export class AppComponent implements OnInit {
     constructor(private _roomService: RoomService) {
     }
 
+    rooms: Room[];
+    selectedRoomName: string;
+    pollSettings = {
+        element: HTMLElement = null,
+        room: '',
+        date: today()
+    };
+
     ngOnInit() {
-        const roomElement = <HTMLSelectElement>document.getElementById('room');
-        var messages = document.getElementById('messages');
-        var pollSettings = {
-            element: messages,
-            room: '',
-            date: today()
-        };
-
-        roomElement.addEventListener('change', () => {
-            var value = roomElement.value;
-            if (value !== pollSettings.room) {
-                cleanElement(messages);
-                pollSettings.room = value;
-                pollSettings.date = today();
-            }
-        });
-
+        const messages = document.getElementById('messages');
+        this.pollSettings.element = messages;
         this._roomService.getRooms().then(rooms => {
-            cleanElement(roomElement);
-            rooms.forEach(room => {
-                const roomName = room.name;
-                var element = document.createElement('option');
-                element.innerText = roomName;
-                element.value = roomName;
-                roomElement.appendChild(element);
-            });
+            this.rooms = rooms;
         });
+        enablePolling(this.pollSettings);
+    }
 
-        enablePolling(pollSettings);
+    onRoomSelected() {
+        const name = this.selectedRoomName;
+        if (name !== this.pollSettings.room) {
+            cleanElement(this.pollSettings.element);
+            this.pollSettings.room = name;
+            this.pollSettings.date = today();
+        }
     }
 }
 

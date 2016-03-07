@@ -1,5 +1,6 @@
-<select id="room">
-<option>Loading...</option>
+<select [(ngModel)]="selectedRoomName"
+        (ngModelChange)="onRoomSelected()">
+    <option *ngFor="#room of rooms" [value]="room.name">{{room.name}}</option>
 </select>
 
 <ul id="dates"></ul>
