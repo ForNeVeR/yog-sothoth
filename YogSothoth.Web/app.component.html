@@ -1,8 +1,15 @@
-<select [(ngModel)]="selectedRoomName"
-        (ngModelChange)="onRoomSelected()">
-    <option *ngFor="#room of rooms" [value]="room.name">{{room.name}}</option>
-</select>
+<div class="rooms">
+    <label for="rooms">Room:</label>
+    <select id="rooms"
+            [(ngModel)]="selectedRoomName"
+            (ngModelChange)="onRoomSelected()">
+        <option *ngFor="#room of rooms" [value]="room.name">{{room.name}}</option>
+    </select>
+</div>
+<div class="dates">
+    <ul id="dates"></ul>
+</div>
 
-<ul id="dates"></ul>
-
-<ul id="messages"></ul>
+<div class="messages">
+    <ul id="messages"></ul>
+</div>
