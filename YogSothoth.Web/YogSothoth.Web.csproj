@@ -51,10 +51,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="app.css" />
-    <Content Include="index.html" />
-    <Content Include="package.json" />
-    <Content Include="webpack.config.js" />
+    <None Include="app.component.html" />
+    <None Include="app.css" />
+    <None Include="index.html" />
+    <None Include="package.json" />
+    <None Include="webpack.config.js" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.component.ts" />
@@ -64,10 +65,14 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="tsconfig.json" />
+    <None Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="typings.json" />
+    <None Include="typings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="room.service.ts" />
+    <None Include="room.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
