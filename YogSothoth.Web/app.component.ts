@@ -1,23 +1,18 @@
 import {Component} from 'angular2/core';
 import {OnInit} from 'angular2/core';
+import {RoomService} from './room.service';
 
 @Component({
     selector: 'ys-app',
-    template: `<select id="room">
-    <option>Loading...</option>
-</select>
-
-<ul id="dates"></ul>
-
-<ul id="messages"></ul>`
+    templateUrl: 'app.component.html',
+    providers: [ RoomService ]
 })
 export class AppComponent /*implements OnInit*/ {
-    constructor() {
-        console.log('ctor');
+    constructor(private _roomService: RoomService) {
     }
 
     ngOnInit() {
-        var room = <HTMLSelectElement>document.getElementById('room');
+        const roomElement = <HTMLSelectElement>document.getElementById('room');
         var messages = document.getElementById('messages');
         var pollSettings = {
             element: messages,
@@ -25,8 +20,8 @@ export class AppComponent /*implements OnInit*/ {
             date: today()
         };
 
-        room.addEventListener('change', () => {
-            var value = room.value;
+        roomElement.addEventListener('change', () => {
+            var value = roomElement.value;
             if (value !== pollSettings.room) {
                 cleanElement(messages);
                 pollSettings.room = value;
@@ -34,13 +29,14 @@ export class AppComponent /*implements OnInit*/ {
             }
         });
 
-        getRooms().then(rooms => {
-            cleanElement(room);
-            rooms.forEach(roomName => {
+        this._roomService.getRooms().then(rooms => {
+            cleanElement(roomElement);
+            rooms.forEach(room => {
+                const roomName = room.name;
                 var element = document.createElement('option');
                 element.innerText = roomName;
                 element.value = roomName;
-                room.appendChild(element);
+                roomElement.appendChild(element);
             });
         });
 
@@ -68,11 +64,6 @@ function cleanElement(element: HTMLElement) {
 }
 
 // API functions
-function getRooms() {
-    var url = 'api/rooms';
-    return fetch(url).then(response => response.json());
-}
-
 function getMessages(room, from, to) {
     var url = `api/messages/${room}?from=${from.getTime()}&to=${to.getTime()}`;
     return fetch(url).then(response => response.json());
