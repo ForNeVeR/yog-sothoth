@@ -6,9 +6,10 @@
         <option *ngFor="#room of rooms" [value]="room.name">{{room.name}}</option>
     </select>
 </div>
-<div class="dates">
-    <ul id="dates"></ul>
-</div>
+
+<my-date-picker [options]="myDatePickerOptions"
+                (dateChanged)="onDateChanged($event)"
+                [selDate]="selectedDate"></my-date-picker>
 
 <div class="messages">
     <ul id="messages"></ul>

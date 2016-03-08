@@ -1,4 +1,5 @@
 import {Component} from 'angular2/core';
+import {MyDatePicker} from 'MyDatePicker/src/app/mydatepicker';
 import {OnInit} from 'angular2/core';
 import {Room} from './room';
 import {RoomService} from './room.service';
@@ -6,6 +7,7 @@ import {RoomService} from './room.service';
 @Component({
     selector: 'ys-app',
     templateUrl: 'app.component.html',
+    directives: [ MyDatePicker ],
     providers: [ RoomService ]
 })
 export class AppComponent implements OnInit {
@@ -36,6 +38,20 @@ export class AppComponent implements OnInit {
             this.pollSettings.room = name;
             this.pollSettings.date = today();
         }
+    }
+
+    myDatePickerOptions = {
+        todayBtnTxt: 'Today',
+        dateFormat: 'dd.mm.yyyy',
+        firstDayOfWeek: 'mo',
+        sunHighlight: true,
+        height: '34px',
+        width: '260px'
+    };
+    selectedDate: string = '20.12.2015';
+
+    onDateChanged(event) {
+        console.log('onDateChanged(): ', event.date, ' - formatted: ', event.formatted, ' - epoc timestamp: ', event.epoc);
     }
 }
 
