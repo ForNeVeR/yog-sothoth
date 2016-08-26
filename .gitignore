@@ -1,13 +1,16 @@
 /.vs/
 /packages/
 
-bin/
-node_modules/
-obj/
+/YogSothoth.Site/typings
+/YogSothoth.Site/wwwroot/bundle.*
 
 /YogSothoth.Web/typings
 /YogSothoth.Web/*.js
 /YogSothoth.Web/*.js.map
 !/YogSothoth.Web/webpack.config.js
+
+bin/
+node_modules/
+obj/
 
 *.user

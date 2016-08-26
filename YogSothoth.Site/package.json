@@ -1,0 +1,24 @@
+{
+  "name": "yog-sothoth",
+  "version": "0.0.1",
+  "scripts": {
+    "postinstall": "typings install",
+    "watch": "webpack --watch",
+    "webpack": "webpack"
+  },
+  "devDependencies": {
+    "MyDatePicker": "github:fornever/mydatepicker",
+    "angular2": "2.0.0-beta.8",
+    "es6-promise": "^3.1.2",
+    "es6-shim": "^0.33.3",
+    "raw-loader": "^0.5.1",
+    "reflect-metadata": "0.1.2",
+    "rxjs": "^5.0.0-beta.2",
+    "source-map-loader": "^0.1.5",
+    "ts-loader": "^0.8.1",
+    "typescript": "^1.8.7",
+    "typings": "^0.6.10",
+    "webpack": "^1.12.14",
+    "zone.js": "0.5.15"
+  }
+}

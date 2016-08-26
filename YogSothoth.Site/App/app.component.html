@@ -1,0 +1,16 @@
+<div class="rooms">
+    <label for="rooms">Room:</label>
+    <select id="rooms"
+            [(ngModel)]="selectedRoomName"
+            (ngModelChange)="onRoomSelected()">
+        <option *ngFor="#room of rooms" [value]="room.name">{{room.name}}</option>
+    </select>
+</div>
+
+<my-date-picker [options]="myDatePickerOptions"
+                (dateChanged)="onDateChanged($event)"
+                [selDate]="selectedDate"></my-date-picker>
+
+<div class="messages">
+    <ul id="messages"></ul>
+</div>
